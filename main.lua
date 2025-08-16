@@ -29,7 +29,7 @@ end
 
 local function genUuid()
 
-	seed = getSeed()
+	local seed = getSeed()
 	math.randomseed(seed)
 
 	local uuid = ''
@@ -53,6 +53,30 @@ local function genUuid()
 	return uuid
 
 end
+
+SCREEN_W = 800
+SCREEN_H = 600 
+
+math.randomseed(getSeed()) 
+
+local sprite = {}
+sprite.position = {
+    x = math.random(SCREEN_W/3, SCREEN_W * 2/3), 
+    y = math.random(SCREEN_H/3, SCREEN_H * 2/3)}
+sprite.size = 30
+sprite.speed = 5
+
+function pick_color(min, max)
+    min = min or 100 
+    max = max or 255
+        return math.random(min, max)/255
+end
+
+sprite.color = {
+    r = pick_color(),
+    g = pick_color(), 
+    b = pick_color() 
+}
 
 
 function love.load()
@@ -118,6 +142,10 @@ function love.draw()
     love.graphics.print('Serveur '..text, 10, text_y)
     love.graphics.print('timer '..client.timer, 300, 10)
     love.graphics.print('connecté '..tostring(client.connectionAccepted), 10, 70)
+
+    love.graphics.setColor(sprite.color.r, sprite.color.g, sprite.color.b)
+    love.graphics.rectangle('fill', sprite.position.x, sprite.position.y, sprite.size, sprite.size)
+    love.graphics.setColor(1, 1, 1)
 end
 
 

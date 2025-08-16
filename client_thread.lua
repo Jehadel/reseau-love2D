@@ -5,11 +5,16 @@ local channel_fromMain = love.thread.getChannel('send')
 local channel_toMain = love.thread.getChannel('receive')
 
 -- création socket
-local udp = socket.udp4()
-udp:settimeout(0)
 
 local server_ip = '127.0.0.1'
 local server_port = 54321
+local timeout = 0.01
+local udp = socket.udp4()
+if not udp then
+    print('ERREUR: Impossible de créer le socket UDP IPv4')
+end
+
+udp:settimeout(timeout)
 
 print('Thread réseau démarré')
 
@@ -35,13 +40,21 @@ while true do
     end
     
     -- Vérifier les réponses du serveur
-    local data, ip, port = udp:receivefrom()
-    if data then
-        channel_toMain:push(data)
-        print('Réponse reçue du serveur: ' .. data)
+    local ready_read, _, errorMsg = socket.select({udp}, nil, timeout)
+    if errorMsg ~= nil then
+        if errorMsg ~= 'timeout' then 
+            print('Erreur lors de l’exécution de socket.select() : '..errorMsg)
+        end
+    end
+
+    if ready_read[1] then
+        local data, ip, port = udp:receivefrom()
+        if data then
+            channel_toMain:push(data)
+            print('Réponse reçue du serveur: ' .. data)
+        end
     end
     
-    socket.sleep(0.1)
 end
 
 -- On ferme proprement
